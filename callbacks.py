@@ -19,7 +19,18 @@ def register_callbacks(app):
     def update_tabs(cluster_contents, rules_contents):
         tabs = []
         
-        # Association rules tabs
+        # Add clustering tabs if cluster file is uploaded
+        if cluster_contents:
+            tabs.extend([
+                dcc.Tab(label='Граф', value='tab-1'),
+                dcc.Tab(label='Матрица', value='tab-2'),
+                dcc.Tab(label='Heatmap', value='tab-3'),
+                dcc.Tab(label='Инфо за възел', value='tab-4'),
+                dcc.Tab(label='Анализ', value='tab-5')
+            ])
+            return tabs  # Return immediately if cluster file is present
+        
+        # Only show rules tabs if no cluster file but rules file exists
         if rules_contents:
             tabs.extend([
                 dcc.Tab(label='Таблица с правила', value='tab-6'),
@@ -29,16 +40,6 @@ def register_callbacks(app):
             ])
         else:
             tabs.append(dcc.Tab(label='Моля, качете файл', value='tab-6'))
-        
-        # Add clustering tabs only if cluster file is uploaded
-        if cluster_contents:
-            tabs.extend([
-                dcc.Tab(label='Граф', value='tab-1'),
-                dcc.Tab(label='Матрица', value='tab-2'),
-                dcc.Tab(label='Heatmap', value='tab-3'),
-                dcc.Tab(label='Инфо за възел', value='tab-4'),
-                dcc.Tab(label='Анализ', value='tab-5')
-            ])
         
         return tabs
 
@@ -56,8 +57,11 @@ def register_callbacks(app):
         content_type, content_string = file_contents.split(',')
         decoded = base64.b64decode(content_string).decode('utf-8')
 
-        rdf_graph = rdf_utils.parse_rdf(decoded)
-        nx_graph = rdf_utils.graph_to_networkx(rdf_graph)
+        try:
+            rdf_graph = rdf_utils.parse_rdf(decoded)
+            nx_graph = rdf_utils.graph_to_networkx(rdf_graph)
+        except ValueError as e:
+            return html.Div(f"Грешка: {str(e)}", style={'color': 'red'}), no_update, no_update
 
         # Filter only nodes of type member, cluster, centroid
         allowed_nodes = []
@@ -84,8 +88,74 @@ def register_callbacks(app):
         ctx = dash.callback_context
         trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-        # Handle association rules upload and tabs
-        if tab in ['tab-6', 'tab-7', 'tab-8', 'tab-9']:
+        # Handle cluster visualization first
+        if file_contents:
+            # Handle clustering visualization
+            content_type, content_string = file_contents.split(',')
+            decoded = base64.b64decode(content_string).decode('utf-8')
+
+            rdf_graph = rdf_utils.parse_rdf(decoded)
+            nx_graph = rdf_utils.graph_to_networkx(rdf_graph)
+            graph_utils.compute_communities(nx_graph)
+
+            # Return appropriate content based on selected tab
+            if tab == 'tab-1':
+                return None, dcc.Graph(figure=graph_utils.create_network_figure(nx_graph))
+
+            if tab == 'tab-2':
+                adj_df = graph_utils.create_adjacency_matrix(nx_graph)
+                return None, html.Div([
+                    html.H4("Матрица на съседство"),
+                    dcc.Graph(figure=graph_utils.create_table_figure(adj_df))
+                ])
+
+            if tab == 'tab-3':
+                return None, dcc.Graph(figure=graph_utils.create_heatmap(nx_graph))
+
+            if tab == 'tab-4':
+                if not selected_node:
+                    return None, html.Div("Избери възел от падащото меню горе.")
+
+                neighbors = list(nx_graph.neighbors(selected_node))
+                group = nx_graph.nodes[selected_node].get('group', 'N/A')
+                degree = nx_graph.degree(selected_node)
+
+                return None, html.Div([
+                    html.H4(f"Информация за възел: {selected_node}"),
+                    html.Ul([
+                        html.Li(f"Възел: {selected_node}"),
+                        html.Li(f"Група: {group}"),
+                        html.Li(f"Степен: {degree}"),
+                        html.Li(f"Свързани възли: {', '.join(neighbors)}")
+                    ])
+                ])
+
+            if tab == 'tab-5':
+                num_nodes = nx_graph.number_of_nodes()
+                num_edges = nx_graph.number_of_edges()
+                avg_degree = sum(dict(nx_graph.degree()).values()) / num_nodes
+                density = nx.density(nx_graph)
+
+                partition = graph_utils.compute_communities(nx_graph)
+                communities = {}
+                for node, group in partition.items():
+                    communities.setdefault(group, []).append(node)
+
+                largest_community = max(communities.items(), key=lambda x: len(x[1]))
+
+                return None, html.Div([
+                    html.H4("Анализ на графа"),
+                    html.Ul([
+                        html.Li(f"Брой върхове: {num_nodes}"),
+                        html.Li(f"Брой ребра: {num_edges}"),
+                        html.Li(f"Средна степен: {avg_degree:.2f}"),
+                        html.Li(f"Плътност на графа: {density:.4f}"),
+                        html.Li(f"Най-голяма общност: {largest_community[0]} с {len(largest_community[1])} върха")
+                    ])
+                ])
+
+        # Only handle rules tabs if there's no cluster file
+        if not file_contents and tab in ['tab-6', 'tab-7', 'tab-8', 'tab-9']:
             if not rules_contents:
                 return None, html.Div([
                     html.H4("Няма заредени асоциативни правила"),
@@ -280,80 +350,69 @@ def register_callbacks(app):
 
         # Handle tab changes
         if trigger_id == 'tabs':
-            if tab == 'tab-6':
+            # Remove the explicit check for tab-6 since we don't want to show rules message when cluster file is present
+            if file_contents:
+                if tab == 'tab-1':
+                    return dash.no_update, dcc.Graph(figure=graph_utils.create_network_figure(nx_graph))
+
+                if tab == 'tab-2':
+                    adj_df = graph_utils.create_adjacency_matrix(nx_graph)
+                    return dash.no_update, html.Div([
+                        html.H4("Матрица на съседство"),
+                        dcc.Graph(figure=graph_utils.create_table_figure(adj_df))
+                    ])
+
+                if tab == 'tab-3':
+                    return dash.no_update, dcc.Graph(figure=graph_utils.create_heatmap(nx_graph))
+
+                if tab == 'tab-4':
+                    if not selected_node:
+                        return dash.no_update, html.Div("Избери възел от падащото меню горе.")
+
+                    neighbors = list(nx_graph.neighbors(selected_node))
+                    group = nx_graph.nodes[selected_node].get('group', 'N/A')
+                    degree = nx_graph.degree(selected_node)
+
+                    return dash.no_update, html.Div([
+                        html.H4(f"Информация за възел: {selected_node}"),
+                        html.Ul([
+                            html.Li(f"Възел: {selected_node}"),
+                            html.Li(f"Група: {group}"),
+                            html.Li(f"Степен: {degree}"),
+                            html.Li(f"Свързани възли: {', '.join(neighbors)}")
+                        ])
+                    ])
+
+                if tab == 'tab-5':
+                    num_nodes = nx_graph.number_of_nodes()
+                    num_edges = nx_graph.number_of_edges()
+                    avg_degree = sum(dict(nx_graph.degree()).values()) / num_nodes
+                    density = nx.density(nx_graph)
+
+                    partition = graph_utils.compute_communities(nx_graph)
+                    communities = {}
+                    for node, group in partition.items():
+                        communities.setdefault(group, []).append(node)
+
+                    largest_community = max(communities.items(), key=lambda x: len(x[1]))
+
+                    return dash.no_update, html.Div([
+                        html.H4("Анализ на графа"),
+                        html.Ul([
+                            html.Li(f"Брой върхове: {num_nodes}"),
+                            html.Li(f"Брой ребра: {num_edges}"),
+                            html.Li(f"Средна степен: {avg_degree:.2f}"),
+                            html.Li(f"Плътност на графа: {density:.4f}"),
+                            html.Li(f"Най-голяма общност: {largest_community[0]} с {len(largest_community[1])} върха")
+                        ])
+                    ])
+
+            # Only show rules-related messages if no cluster file is present
+            if not file_contents and tab in ['tab-6', 'tab-7', 'tab-8', 'tab-9']:
                 if not rules_contents:
                     return None, html.Div([
                         html.H4("Няма заредени асоциативни правила"),
                         html.P("Моля, качете TTL файл с асоциативни правила.")
                     ])
-                return dash.no_update, dash.no_update
-
-            # Handle clustering tabs
-            if not file_contents:
-                return dash.no_update, html.Div("Моля, качете файл с клъстери, за да видите тази таб." )
-
-            # Handle clustering visualization
-            content_type, content_string = file_contents.split(',')
-            decoded = base64.b64decode(content_string).decode('utf-8')
-
-            rdf_graph = rdf_utils.parse_rdf(decoded)
-            nx_graph = rdf_utils.graph_to_networkx(rdf_graph)
-            graph_utils.compute_communities(nx_graph)
-
-            # Return appropriate content based on selected tab
-            if tab == 'tab-1':
-                return dash.no_update, dcc.Graph(figure=graph_utils.create_network_figure(nx_graph))
-
-            if tab == 'tab-2':
-                adj_df = graph_utils.create_adjacency_matrix(nx_graph)
-                return dash.no_update, html.Div([
-                    html.H4("Матрица на съседство"),
-                    dcc.Graph(figure=graph_utils.create_table_figure(adj_df))
-                ])
-
-            if tab == 'tab-3':
-                return dash.no_update, dcc.Graph(figure=graph_utils.create_heatmap(nx_graph))
-
-            if tab == 'tab-4':
-                if not selected_node:
-                    return dash.no_update, html.Div("Избери възел от падащото меню горе.")
-
-                neighbors = list(nx_graph.neighbors(selected_node))
-                group = nx_graph.nodes[selected_node].get('group', 'N/A')
-                degree = nx_graph.degree(selected_node)
-
-                return dash.no_update, html.Div([
-                    html.H4(f"Информация за възел: {selected_node}"),
-                    html.Ul([
-                        html.Li(f"Възел: {selected_node}"),
-                        html.Li(f"Група: {group}"),
-                        html.Li(f"Степен: {degree}"),
-                        html.Li(f"Свързани възли: {', '.join(neighbors)}")
-                    ])
-                ])
-
-            if tab == 'tab-5':
-                num_nodes = nx_graph.number_of_nodes()
-                num_edges = nx_graph.number_of_edges()
-                avg_degree = sum(dict(nx_graph.degree()).values()) / num_nodes
-                density = nx.density(nx_graph)
-
-                partition = graph_utils.compute_communities(nx_graph)
-                communities = {}
-                for node, group in partition.items():
-                    communities.setdefault(group, []).append(node)
-
-                largest_community = max(communities.items(), key=lambda x: len(x[1]))
-
-                return dash.no_update, html.Div([
-                    html.H4("Анализ на графа"),
-                    html.Ul([
-                        html.Li(f"Брой върхове: {num_nodes}"),
-                        html.Li(f"Брой ребра: {num_edges}"),
-                        html.Li(f"Средна степен: {avg_degree:.2f}"),
-                        html.Li(f"Плътност на графа: {density:.4f}"),
-                        html.Li(f"Най-голяма общност: {largest_community[0]} с {len(largest_community[1])} върха")
-                    ])
-                ])
 
         return dash.no_update, html.Div("Избери таб.")

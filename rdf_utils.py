@@ -3,9 +3,18 @@ import networkx as nx
 from rdflib import URIRef
 
 def parse_rdf(content):
+    """Parse RDF content in Turtle format and return an RDFlib Graph."""
     g = Graph()
-    g.parse(data=content, format='turtle')
-    return g
+    try:
+        g.parse(data=content, format='turtle')
+        return g
+    except Exception as e:
+        error_msg = f"Failed to parse RDF content: {str(e)}"
+        # Log the error and the content for debugging
+        print(f"Error parsing RDF: {error_msg}")
+        print("Content that failed to parse:")
+        print(content)
+        raise ValueError(error_msg)
 
 def graph_to_networkx(rdf_graph):
     G = nx.Graph()
