@@ -1,0 +1,7 @@
+dash
+dash-bootstrap-components
+rdflib
+networkx
+python-louvain
+plotly
+pandas
