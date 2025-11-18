@@ -1,0 +1,32 @@
+name: "Main Branch Rules"
+target: branch
+enforcement: active
+
+conditions:
+  refs:
+    include:
+      - "refs/heads/main"
+
+rules:
+  - type: pull_request
+    parameters:
+      requiredApprovals: 1
+      dismissStaleReviews: true
+      requireCodeOwnerReview: true
+      requiredReviewThreadResolution: true
+
+  - type: required_status_checks
+    parameters:
+      strictRequiredStatusChecks: true
+      requiredStatusChecks:
+        - "build"
+        - "tests"
+
+  - type: commit_message_pattern
+    parameters:
+      name: "Conventional Commits"
+      message: "^(feat|fix|docs|style|refactor|test|chore)(\\(.+\\))?: .+$"
+
+  - type: required_signatures
+    parameters:
+      requireSignedCommits: true
