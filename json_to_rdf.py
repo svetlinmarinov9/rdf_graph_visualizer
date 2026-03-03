@@ -22,9 +22,12 @@ g.add((result, RDF.type, ONT.ClusteringResult))
 g.add((DATA["squaredEuclidean"], RDF.type, ONT.DistanceFunction))
 g.add((result, ONT.usedSimilarityMeasure, DATA["squaredEuclidean"]))
 
-# Алгоритъм (не е в JSON, затова го отбелязваме като unknown)
-g.add((DATA["unknownAlgorithm"], RDF.type, ONT.ClusteringAlgorithm))
-g.add((result, ONT.usedAlgorithm, DATA["unknownAlgorithm"]))
+# Алгоритъм (ако е наличен в JSON)
+if "rm_object_type" in data:
+    algorithm_name = data["rm_object_type"].split(".")[-1]  # извличаме последното име
+    algorithm_uri = DATA[algorithm_name]
+    g.add((algorithm_uri, RDF.type, ONT.ClusteringAlgorithm))
+    g.add((result, ONT.usedAlgorithm, algorithm_uri))
 
 # Обработка на клъстери
 for cluster in data["clusters"]:

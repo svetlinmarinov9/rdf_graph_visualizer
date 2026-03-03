@@ -63,11 +63,13 @@ def register_callbacks(app):
         except ValueError as e:
             return html.Div(f"Грешка: {str(e)}", style={'color': 'red'}), no_update, no_update
 
-        # Filter only nodes of type member, cluster, centroid
+        # Filter only nodes from cluster0-3
+        clusters_to_show = ['cluster0', 'cluster1', 'cluster2', 'cluster3']
         allowed_nodes = []
         for node in nx_graph.nodes():
             node_str = str(node).lower()
-            if any(key in node_str for key in ['member', 'cluster', 'centroid']):
+            # Показваме cluster0-3 и техните member-и
+            if any(cluster in node_str for cluster in clusters_to_show):
                 allowed_nodes.append({'label': node, 'value': node})
 
         allowed_nodes.sort(key=lambda x: x['label'].lower())
@@ -79,8 +81,8 @@ def register_callbacks(app):
          Output('tabs-content', 'children')],
         [Input('tabs', 'value'),
          Input('upload-data', 'contents'),
-         Input('upload-rules', 'contents')],
-        [State('node-selector', 'value')],
+         Input('upload-rules', 'contents'),
+         Input('node-selector', 'value')],
         prevent_initial_call=True,
         allow_duplicate=True
     )
@@ -100,13 +102,27 @@ def register_callbacks(app):
 
             # Return appropriate content based on selected tab
             if tab == 'tab-1':
-                return None, dcc.Graph(figure=graph_utils.create_network_figure(nx_graph))
+                # Филтрираме нежелани типове възли, но държим клъстери 0-3
+                exclude_keywords = ['clustermember', 'clusteringalgorithm', 'centroidclustermodel', 'centroid0', 'centroid1', 'centroid2', 'centroid3']
+                # Отделно исключваме "Cluster" точно
+                nodes_to_keep = [n for n in nx_graph.nodes() if not (any(ex.lower() in str(n).lower() for ex in exclude_keywords) or str(n).lower() == 'cluster')]
+                nx_graph_filtered = nx_graph.subgraph(nodes_to_keep).copy()
+                return None, dcc.Graph(figure=graph_utils.create_network_figure(nx_graph_filtered))
 
             if tab == 'tab-2':
                 adj_df = graph_utils.create_adjacency_matrix(nx_graph)
+                # Редове: cluster0-3, Колони: всички ОСВЕН cluster0-3 и други неважни елементи
+                clusters_to_show = ['cluster0', 'cluster1', 'cluster2', 'cluster3']
+                exclude_keywords = ['cluster0', 'cluster1', 'cluster2', 'cluster3', 'clustermember', 'cluster', 'centroidclustermodel', 'clusteringalgorithm']
+                rows_to_show = [c for c in clusters_to_show if c in adj_df.index]
+                cols_to_show = sorted([c for c in adj_df.columns if not any(ex.lower() in str(c).lower() for ex in exclude_keywords)])
+                if rows_to_show and cols_to_show:
+                    adj_df_filtered = adj_df.loc[rows_to_show, cols_to_show]
+                else:
+                    adj_df_filtered = adj_df
                 return None, html.Div([
                     html.H4("Матрица на съседство"),
-                    dcc.Graph(figure=graph_utils.create_table_figure(adj_df))
+                    dcc.Graph(figure=graph_utils.create_table_figure(adj_df_filtered))
                 ])
 
             if tab == 'tab-3':
@@ -117,6 +133,8 @@ def register_callbacks(app):
                     return None, html.Div("Избери възел от падащото меню горе.")
 
                 neighbors = list(nx_graph.neighbors(selected_node))
+                # Филтрираме само member-и
+                members = [n for n in neighbors if 'member' in str(n).lower()]
                 group = nx_graph.nodes[selected_node].get('group', 'N/A')
                 degree = nx_graph.degree(selected_node)
 
@@ -126,7 +144,7 @@ def register_callbacks(app):
                         html.Li(f"Възел: {selected_node}"),
                         html.Li(f"Група: {group}"),
                         html.Li(f"Степен: {degree}"),
-                        html.Li(f"Свързани възли: {', '.join(neighbors)}")
+                        html.Li(f"Освързани member-и: {', '.join(members) if members else 'Няма'}")
                     ])
                 ])
 
@@ -353,13 +371,27 @@ def register_callbacks(app):
             # Remove the explicit check for tab-6 since we don't want to show rules message when cluster file is present
             if file_contents:
                 if tab == 'tab-1':
-                    return dash.no_update, dcc.Graph(figure=graph_utils.create_network_figure(nx_graph))
+                    # Филтрираме нежелани типове възли, но държим клъстери 0-3
+                    exclude_keywords = ['clustermember', 'clusteringalgorithm', 'centroidclustermodel', 'centroid0', 'centroid1', 'centroid2', 'centroid3']
+                    # Отделно исключваме "Cluster" точно
+                    nodes_to_keep = [n for n in nx_graph.nodes() if not (any(ex.lower() in str(n).lower() for ex in exclude_keywords) or str(n).lower() == 'cluster')]
+                    nx_graph_filtered = nx_graph.subgraph(nodes_to_keep).copy()
+                    return dash.no_update, dcc.Graph(figure=graph_utils.create_network_figure(nx_graph_filtered))
 
                 if tab == 'tab-2':
                     adj_df = graph_utils.create_adjacency_matrix(nx_graph)
+                    # Редове: cluster0-3, Колони: всички ОСВЕН cluster0-3 и други неважни елементи
+                    clusters_to_show = ['cluster0', 'cluster1', 'cluster2', 'cluster3']
+                    exclude_keywords = ['cluster0', 'cluster1', 'cluster2', 'cluster3', 'clustermember', 'cluster', 'centroidclustermodel', 'clusteringalgorithm']
+                    rows_to_show = [c for c in clusters_to_show if c in adj_df.index]
+                    cols_to_show = sorted([c for c in adj_df.columns if not any(ex.lower() in str(c).lower() for ex in exclude_keywords)])
+                    if rows_to_show and cols_to_show:
+                        adj_df_filtered = adj_df.loc[rows_to_show, cols_to_show]
+                    else:
+                        adj_df_filtered = adj_df
                     return dash.no_update, html.Div([
                         html.H4("Матрица на съседство"),
-                        dcc.Graph(figure=graph_utils.create_table_figure(adj_df))
+                        dcc.Graph(figure=graph_utils.create_table_figure(adj_df_filtered))
                     ])
 
                 if tab == 'tab-3':
@@ -370,6 +402,8 @@ def register_callbacks(app):
                         return dash.no_update, html.Div("Избери възел от падащото меню горе.")
 
                     neighbors = list(nx_graph.neighbors(selected_node))
+                    # Филтрираме само member-и
+                    members = [n for n in neighbors if 'member' in str(n).lower()]
                     group = nx_graph.nodes[selected_node].get('group', 'N/A')
                     degree = nx_graph.degree(selected_node)
 
@@ -379,7 +413,7 @@ def register_callbacks(app):
                             html.Li(f"Възел: {selected_node}"),
                             html.Li(f"Група: {group}"),
                             html.Li(f"Степен: {degree}"),
-                            html.Li(f"Свързани възли: {', '.join(neighbors)}")
+                            html.Li(f"Освързани member-и: {', '.join(members) if members else 'Няма'}")
                         ])
                     ])
 

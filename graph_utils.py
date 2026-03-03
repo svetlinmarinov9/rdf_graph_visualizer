@@ -29,7 +29,8 @@ def compute_communities(G):
     return partition
 
 def create_network_figure(G):
-    pos = nx.kamada_kawai_layout(G)
+    # Използваме spring_layout с повече итерации и по-голямо k за повече място
+    pos = nx.spring_layout(G, k=2, iterations=100, seed=42)
 
     # Рисуване на ребрата
     edge_trace = go.Scatter(
@@ -99,35 +100,66 @@ def create_network_figure(G):
 
 def create_heatmap(G):
     adj_df = create_adjacency_matrix(G)
+    # Филтрираме редове и колони както в таблицата
+    clusters_to_show = ['cluster0', 'cluster1', 'cluster2', 'cluster3']
+    exclude_keywords = ['cluster0', 'cluster1', 'cluster2', 'cluster3', 'clustermember', 'cluster', 'centroidclustermodel', 'clusteringalgorithm']
+    rows_to_show = [c for c in clusters_to_show if c in adj_df.index]
+    cols_to_show = sorted([c for c in adj_df.columns if not any(ex.lower() in str(c).lower() for ex in exclude_keywords)])
+    
+    if rows_to_show and cols_to_show:
+        adj_df_filtered = adj_df.loc[rows_to_show, cols_to_show]
+    else:
+        adj_df_filtered = adj_df
+    
     return go.Figure(
         data=go.Heatmap(
-            z=adj_df.values,
-            x=adj_df.columns,
-            y=adj_df.index,
-            colorscale='YlOrRd'
+            z=adj_df_filtered.values,
+            x=adj_df_filtered.columns,
+            y=adj_df_filtered.index,
+            colorscale='YlOrRd',
+            xgap=2,  # Разстояние между колоните
+            ygap=2,  # Разстояние между редовете
+            hovertemplate='%{y} - %{x}: %{z}<extra></extra>'
         ),
         layout=go.Layout(
             title="Heatmap на съседството",
             title_x=0.5,
-            margin=dict(t=40, b=40),
+            margin=dict(l=100, r=50, t=50, b=100),
             paper_bgcolor='#f9f9f9',
+            width=max(600, len(adj_df_filtered.columns) * 80),
+            height=max(500, len(adj_df_filtered) * 80)
         )
     )
 
 def create_table_figure(adj_df):
+    # Изчисляване на ширина - 120px минимум за колона
+    column_count = len(adj_df.columns) + 1
+    width = 120 * column_count
+    height = max(600, len(adj_df) * 30)
+    
     return go.Figure(
         data=[go.Table(
+            columnwidth=[120] * column_count,
             header=dict(
                 values=["Върхове"] + list(adj_df.columns),
                 fill_color='paleturquoise',
-                align='left',
-                font=dict(color='black', size=12)
+                align='center',
+                font=dict(color='black', size=12),
+                height=30
             ),
             cells=dict(
                 values=[adj_df.index] + [adj_df[col].tolist() for col in adj_df.columns],
                 fill_color='lavender',
-                align='left',
-                font=dict(color='black', size=11)
+                align='center',
+                font=dict(color='black', size=11),
+                height=25
             )
-        )]
+        )],
+        layout=go.Layout(
+            margin=dict(l=50, r=50, t=50, b=50),
+            height=height,
+            width=width,
+            template='plotly_white',
+            xaxis=dict(automargin=True)
+        )
     )
