@@ -201,20 +201,20 @@ def register_callbacks(app):
                             dbc.Table([
                                 html.Thead(
                                     html.Tr([
-                                        html.Th("Антецедент"),
-                                        html.Th("Консеквент"),
-                                        html.Th("Достоверност"),
-                                        html.Th("Повдигане"),
-                                        html.Th("Поддръжка")
+                                        html.Th("Предпоставка", style={"textAlign": "center", "verticalAlign": "middle"}),
+                                        html.Th("Заключение", style={"textAlign": "center", "verticalAlign": "middle"}),
+                                        html.Th("Достоверност", style={"textAlign": "center", "verticalAlign": "middle"}),
+                                        html.Th("Коефициент на зависимост", style={"textAlign": "center", "verticalAlign": "middle"}),
+                                        html.Th("Поддръжка", style={"textAlign": "center", "verticalAlign": "middle"})
                                     ])
                                 ),
                                 html.Tbody([
                                     html.Tr([
-                                        html.Td(rule.antecedent),
-                                        html.Td(rule.consequent),
-                                        html.Td(f"{rule.confidence:.3f}"),
-                                        html.Td(f"{rule.lift:.3f}"),
-                                        html.Td(f"{rule.support:.3f}")
+                                        html.Td(rule.antecedent, style={"textAlign": "center", "verticalAlign": "middle"}),
+                                        html.Td(rule.consequent, style={"textAlign": "center", "verticalAlign": "middle"}),
+                                        html.Td(f"{rule.confidence:.3f}", style={"textAlign": "center", "verticalAlign": "middle"}),
+                                        html.Td(f"{rule.lift:.3f}", style={"textAlign": "center", "verticalAlign": "middle"}),
+                                        html.Td(f"{rule.support:.3f}", style={"textAlign": "center", "verticalAlign": "middle"})
                                     ]) for rule in rules
                                 ])
                             ], bordered=True, hover=True, striped=True, className="mt-3")
@@ -244,7 +244,7 @@ def register_callbacks(app):
                                                     ])
                                                 ]),
                                                 dbc.ListGroupItem([
-                                                    html.Strong("Повдигане:"),
+                                                    html.Strong("Коефициент на зависимост:"),
                                                     html.Div([
                                                         html.Div(f"Средно: {avg_lift:.3f}"),
                                                         html.Div(f"Мин: {min(rule.lift for rule in rules):.3f}"),
@@ -287,11 +287,11 @@ def register_callbacks(app):
                                     ])
                                 ], bordered=True, hover=True, striped=True),
                                 
-                                html.H5("Топ 5 по повдигане", className="mt-4"),
+                                html.H5("Топ 5 по коефициент на зависимост", className="mt-4"),
                                 dbc.Table([
                                     html.Thead(html.Tr([
                                         html.Th("Правило"),
-                                        html.Th("Повдигане")
+                                        html.Th("Коефициент на зависимост")
                                     ])),
                                     html.Tbody([
                                         html.Tr([
@@ -320,7 +320,7 @@ def register_callbacks(app):
                                                         'color': [rule.lift for rule in rules],
                                                         'colorscale': 'Viridis',
                                                         'showscale': True,
-                                                        'colorbar': {'title': 'Повдигане'}
+                                                        'colorbar': {'title': 'Коефициент на зависимост'}
                                                     },
                                                     'text': [f"{rule.antecedent} → {rule.consequent}<br>Lift: {rule.lift:.3f}" for rule in rules],
                                                     'hoverinfo': 'text',
@@ -352,8 +352,8 @@ def register_callbacks(app):
                                                 }
                                             ],
                                             'layout': {
-                                                'title': 'Разпределение на повдигането',
-                                                'xaxis': {'title': 'Повдигане'},
+                                                'title': 'Разпределение на коефициента на зависимост',
+                                                'xaxis': {'title': 'Коефициент на зависимост'},
                                                 'yaxis': {'title': 'Брой правила'},
                                                 'template': 'plotly_white'
                                             }
