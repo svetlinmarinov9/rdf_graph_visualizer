@@ -133,8 +133,8 @@ def register_callbacks(app):
                     return None, html.Div("Избери възел от падащото меню горе.")
 
                 neighbors = list(nx_graph.neighbors(selected_node))
-                # Филтрираме само member-и
-                members = [n for n in neighbors if 'member' in str(n).lower()]
+                # Филтрираме членове: това са възли свързани с клъстер (не самите cluster-и)
+                members = [n for n in neighbors if 'cluster' not in str(n).lower() and 'centroid' not in str(n).lower()]
                 group = nx_graph.nodes[selected_node].get('group', 'N/A')
                 degree = nx_graph.degree(selected_node)
 

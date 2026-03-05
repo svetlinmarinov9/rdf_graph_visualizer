@@ -24,10 +24,18 @@ def graph_to_networkx(rdf_graph):
         p_label = strip_prefix(p)
 
         # ➤ Филтър: позволяваме само възли от интерес:
-        allowed_keywords = ['member', 'cluster', 'centroid']
-        if not any(key in s_label.lower() for key in allowed_keywords):
+        # Връзки от cluster до членове (например: cluster0 isMemberOf member1 или cluster0 hasMember productName)
+        allowed_predicates = ['hasmember', 'ismemberof', 'hascluster', 'hascentroid']
+        allowed_keywords = ['cluster']
+        
+        # Включи всички ребра между cluster-и и других възли
+        if not any(p.lower() in allowed_predicates for p in [p_label]):
+            # Ако предиката не е за връзки между членове и клъстери, скипни
             continue
-        if not any(key in o_label.lower() for key in allowed_keywords):
+        
+        # Проверяваме че поне един край е cluster
+        if not (any(key in s_label.lower() for key in allowed_keywords) or 
+                any(key in o_label.lower() for key in allowed_keywords)):
             continue
 
         G.add_node(s_label)
