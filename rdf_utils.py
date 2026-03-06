@@ -27,7 +27,12 @@ def graph_to_networkx(rdf_graph):
         # Връзки от cluster до членове (например: cluster0 isMemberOf member1 или cluster0 hasMember productName)
         allowed_predicates = ['hasmember', 'ismemberof', 'hascluster', 'hascentroid']
         allowed_keywords = ['cluster']
+        excluded_nodes = ['result1', 'centroid0', 'centroid1', 'centroid2', 'centroid3']
         
+        # Поправи ексклудирани нодове
+        if any(excl.lower() in s_label.lower() for excl in excluded_nodes) or \
+           any(excl.lower() in o_label.lower() for excl in excluded_nodes):
+            continue        
         # Включи всички ребра между cluster-и и других възли
         if not any(p.lower() in allowed_predicates for p in [p_label]):
             # Ако предиката не е за връзки между членове и клъстери, скипни

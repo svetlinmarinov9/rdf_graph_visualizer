@@ -126,7 +126,9 @@ def register_callbacks(app):
                 ])
 
             if tab == 'tab-3':
-                return None, dcc.Graph(figure=graph_utils.create_heatmap(nx_graph))
+                return None, html.Div([
+                    dcc.Graph(figure=graph_utils.create_heatmap(nx_graph), style={'width': '100%', 'height': '85vh'})
+                ], style={'width': '100vw', 'height': '85vh', 'marginLeft': 'calc(-50vw + 50%)', 'marginRight': 'calc(-50vw + 50%)'})
 
             if tab == 'tab-4':
                 if not selected_node:
@@ -137,14 +139,18 @@ def register_callbacks(app):
                 members = [n for n in neighbors if 'cluster' not in str(n).lower() and 'centroid' not in str(n).lower()]
                 group = nx_graph.nodes[selected_node].get('group', 'N/A')
                 degree = nx_graph.degree(selected_node)
+                
+                # Форматирай имена: замени _ със интервали
+                formatted_node = str(selected_node).replace('_', ' ')
+                formatted_members = [str(m).replace('_', ' ') for m in members]
 
                 return None, html.Div([
-                    html.H4(f"Информация за възел: {selected_node}"),
+                    html.H4(f"Информация за възел: {formatted_node}"),
                     html.Ul([
-                        html.Li(f"Възел: {selected_node}"),
+                        html.Li(f"Възел: {formatted_node}"),
                         html.Li(f"Група: {group}"),
                         html.Li(f"Степен: {degree}"),
-                        html.Li(f"Освързани member-и: {', '.join(members) if members else 'Няма'}")
+                        html.Li(f"Свързани продукти: {', '.join(formatted_members) if formatted_members else 'Няма'}")
                     ])
                 ])
 
@@ -395,7 +401,9 @@ def register_callbacks(app):
                     ])
 
                 if tab == 'tab-3':
-                    return dash.no_update, dcc.Graph(figure=graph_utils.create_heatmap(nx_graph))
+                    return dash.no_update, html.Div([
+                        dcc.Graph(figure=graph_utils.create_heatmap(nx_graph), style={'width': '100%', 'height': '85vh'})
+                    ], style={'width': '100vw', 'height': '85vh', 'marginLeft': 'calc(-50vw + 50%)', 'marginRight': 'calc(-50vw + 50%)'})
 
                 if tab == 'tab-4':
                     if not selected_node:

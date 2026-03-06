@@ -63,7 +63,7 @@ def create_network_figure(G):
         x, y = pos[node]
         node_x.append(x)
         node_y.append(y)
-        node_text.append(str(node))
+        node_text.append(str(node).replace('_', ' '))
         node_color.append(G.nodes[node].get('group', 0))
 
     node_trace = go.Scatter(
@@ -102,7 +102,7 @@ def create_heatmap(G):
     adj_df = create_adjacency_matrix(G)
     # Филтрираме редове и колони както в таблицата
     clusters_to_show = ['cluster0', 'cluster1', 'cluster2', 'cluster3']
-    exclude_keywords = ['cluster0', 'cluster1', 'cluster2', 'cluster3', 'clustermember', 'cluster', 'centroidclustermodel', 'clusteringalgorithm']
+    exclude_keywords = ['cluster0', 'cluster1', 'cluster2', 'cluster3', 'clustermember', 'cluster', 'centroidclustermodel', 'clusteringalgorithm', 'result1', 'centroid0', 'centroid1', 'centroid2', 'centroid3']
     rows_to_show = [c for c in clusters_to_show if c in adj_df.index]
     cols_to_show = sorted([c for c in adj_df.columns if not any(ex.lower() in str(c).lower() for ex in exclude_keywords)])
     
@@ -111,11 +111,15 @@ def create_heatmap(G):
     else:
         adj_df_filtered = adj_df
     
+    # Замени _ със интервал за по-добра четимост
+    formatted_columns = [str(col).replace('_', ' ') for col in adj_df_filtered.columns]
+    formatted_index = [str(idx).replace('_', ' ') for idx in adj_df_filtered.index]
+    
     return go.Figure(
         data=go.Heatmap(
             z=adj_df_filtered.values,
-            x=adj_df_filtered.columns,
-            y=adj_df_filtered.index,
+            x=formatted_columns,
+            y=formatted_index,
             colorscale='YlOrRd',
             xgap=2,  # Разстояние между колоните
             ygap=2,  # Разстояние между редовете
@@ -132,23 +136,32 @@ def create_heatmap(G):
     )
 
 def create_table_figure(adj_df):
+    # Опыт эксклюдирани нодове
+    exclude_nodes = ['result1', 'centroid0', 'centroid1', 'centroid2', 'centroid3']
+    adj_df = adj_df.drop(columns=[c for c in adj_df.columns if any(ex.lower() in str(c).lower() for ex in exclude_nodes)], errors='ignore')
+    adj_df = adj_df.drop(index=[r for r in adj_df.index if any(ex.lower() in str(r).lower() for ex in exclude_nodes)], errors='ignore')
+    
     # Изчисляване на ширина - 120px минимум за колона
     column_count = len(adj_df.columns) + 1
     width = 120 * column_count
     height = max(600, len(adj_df) * 30)
     
+    # Замени _ със интервал за по-добра четимост
+    formatted_columns = [str(col).replace('_', ' ') for col in adj_df.columns]
+    formatted_index = [str(idx).replace('_', ' ') for idx in adj_df.index]
+    
     return go.Figure(
         data=[go.Table(
             columnwidth=[120] * column_count,
             header=dict(
-                values=["Върхове"] + list(adj_df.columns),
+                values=["Върхове"] + formatted_columns,
                 fill_color='paleturquoise',
                 align='center',
                 font=dict(color='black', size=12),
                 height=30
             ),
             cells=dict(
-                values=[adj_df.index] + [adj_df[col].tolist() for col in adj_df.columns],
+                values=[formatted_index] + [adj_df[col].tolist() for col in adj_df.columns],
                 fill_color='lavender',
                 align='center',
                 font=dict(color='black', size=11),
@@ -156,7 +169,7 @@ def create_table_figure(adj_df):
             )
         )],
         layout=go.Layout(
-            margin=dict(l=50, r=50, t=50, b=50),
+            margin=dict(l=125, r=50, t=50, b=50),
             height=height,
             width=width,
             template='plotly_white',
