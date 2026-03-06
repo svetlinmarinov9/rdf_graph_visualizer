@@ -339,7 +339,24 @@ def register_callbacks(app):
                                                 'xaxis': {'title': 'Достоверност', 'range': [0, 1]},
                                                 'yaxis': {'title': 'Поддръжка', 'range': [0, 1]},
                                                 'hovermode': 'closest',
-                                                'template': 'plotly_white'
+                                                'template': 'plotly_white',
+                                                'annotations': [
+                                                    {
+                                                        'text': '<b>Легенда:</b><br>X: Вероятност на следствието<br>Y: Дял на правилото<br>Цвят: Коефициент на зависимост',
+                                                        'xref': 'paper',
+                                                        'yref': 'paper',
+                                                        'x': 0.02,
+                                                        'y': 0.98,
+                                                        'showarrow': False,
+                                                        'bgcolor': 'rgba(240, 240, 240, 0.8)',
+                                                        'bordercolor': 'gray',
+                                                        'borderwidth': 1,
+                                                        'borderpad': 10,
+                                                        'xanchor': 'left',
+                                                        'yanchor': 'top',
+                                                        'font': {'size': 11}
+                                                    }
+                                                ]
                                             }
                                         },
                                         className="mb-4"
@@ -361,7 +378,24 @@ def register_callbacks(app):
                                                 'title': 'Разпределение на коефициента на зависимост',
                                                 'xaxis': {'title': 'Коефициент на зависимост'},
                                                 'yaxis': {'title': 'Брой правила'},
-                                                'template': 'plotly_white'
+                                                'template': 'plotly_white',
+                                                'annotations': [
+                                                    {
+                                                        'text': '<b>Легенда:</b><br>X: Коефициент на зависимост<br>Y: Брой правила',
+                                                        'xref': 'paper',
+                                                        'yref': 'paper',
+                                                        'x': 0.02,
+                                                        'y': 0.98,
+                                                        'showarrow': False,
+                                                        'bgcolor': 'rgba(240, 240, 240, 0.8)',
+                                                        'bordercolor': 'gray',
+                                                        'borderwidth': 1,
+                                                        'borderpad': 10,
+                                                        'xanchor': 'left',
+                                                        'yanchor': 'top',
+                                                        'font': {'size': 11}
+                                                    }
+                                                ]
                                             }
                                         }
                                     )
