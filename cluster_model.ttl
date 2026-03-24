@@ -1,0 +1,90 @@
+@prefix data: <http://example.org/data/clustering#> .
+@prefix ont: <http://example.org/ontology/clustering#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+data:Fjallraven_Foldsack_No_1_Backpack_Fits_15_Laptops a ont:ClusterMember ;
+    ont:isMemberOf data:cluster0,
+        data:cluster1 .
+
+data:John_Hardy_Women_s_Legends_Naga_Gold_Silver_Dragon_Station_Chain_Bracelet a ont:ClusterMember ;
+    ont:isMemberOf data:cluster2 .
+
+data:MBJ_Women_s_Solid_Short_Sleeve_Boat_Neck_V a ont:ClusterMember ;
+    ont:isMemberOf data:cluster0 .
+
+data:Mens_Casual_Premium_Slim_Fit_T_Shirts a ont:ClusterMember ;
+    ont:isMemberOf data:cluster0 .
+
+data:Mens_Cotton_Jacket a ont:ClusterMember ;
+    ont:isMemberOf data:cluster0 .
+
+data:Pierced_Owl_Rose_Gold_Plated_Stainless_Steel_Double a ont:ClusterMember ;
+    ont:isMemberOf data:cluster3 .
+
+data:SanDisk_SSD_PLUS_1TB_Internal_SSD_SATA_III_6_Gb_s a ont:ClusterMember ;
+    ont:isMemberOf data:cluster3 .
+
+data:WD_2TB_Elements_Portable_External_Hard_Drive_USB_3_0 a ont:ClusterMember ;
+    ont:isMemberOf data:cluster3 .
+
+data:WD_4TB_Gaming_Drive_Works_with_Playstation_4_Portable_External_Hard_Drive a ont:ClusterMember ;
+    ont:isMemberOf data:cluster0 .
+
+data:White_Gold_Plated_Princess a ont:ClusterMember ;
+    ont:isMemberOf data:cluster3 .
+
+data:result1 a ont:ClusteringResult ;
+    ont:hasCluster data:cluster0,
+        data:cluster1,
+        data:cluster2,
+        data:cluster3 ;
+    ont:usedAlgorithm data:CentroidClusterModel ;
+    ont:usedSimilarityMeasure data:squaredEuclidean .
+
+data:CentroidClusterModel a ont:ClusteringAlgorithm .
+
+data:centroid0 a ont:FeatureVector ;
+    ont:hasFeature "-0.23975164404568033"^^xsd:float,
+        "-0.2397516440456802"^^xsd:float,
+        "-0.12649444950190109"^^xsd:float,
+        "0.0"^^xsd:float,
+        "0.04917473702934019"^^xsd:float,
+        "0.5195516187192806"^^xsd:float .
+
+data:centroid1 a ont:FeatureVector ;
+    ont:hasFeature "-0.9274650285998164"^^xsd:float,
+        "-0.005722344574431989"^^xsd:float,
+        "-0.005722344574431798"^^xsd:float,
+        "0.0"^^xsd:float,
+        "0.07825882122968264"^^xsd:float,
+        "2.753785273643051"^^xsd:float .
+
+data:centroid2 a ont:FeatureVector ;
+    ont:hasFeature "-0.39339789623472154"^^xsd:float,
+        "0.0"^^xsd:float,
+        "0.9304104301751127"^^xsd:float,
+        "0.9651236815049624"^^xsd:float,
+        "3.361375910152539"^^xsd:float .
+
+data:centroid3 a ont:FeatureVector ;
+    ont:hasFeature "-1.291270550289759"^^xsd:float,
+        "-0.6884463184107628"^^xsd:float,
+        "-0.35941010330316625"^^xsd:float,
+        "-0.35941010330316603"^^xsd:float,
+        "0.0"^^xsd:float,
+        "0.24357423577751547"^^xsd:float .
+
+data:squaredEuclidean a ont:DistanceFunction .
+
+data:cluster1 a ont:Cluster ;
+    ont:hasCentroid data:centroid1 .
+
+data:cluster2 a ont:Cluster ;
+    ont:hasCentroid data:centroid2 .
+
+data:cluster3 a ont:Cluster ;
+    ont:hasCentroid data:centroid3 .
+
+data:cluster0 a ont:Cluster ;
+    ont:hasCentroid data:centroid0 .
+

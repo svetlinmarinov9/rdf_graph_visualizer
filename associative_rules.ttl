@@ -1,0 +1,175 @@
+@prefix data: <http://example.org/data/association#> .
+@prefix ont: <http://example.org/ontology/association#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+data:rule1 a ont:AssociationRule ;
+    ont:hasAntecedent data:Mens-Casual-Premium-Slim-Fit-T-Shirts ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 1.75e+00 ;
+    ont:hasSupport 2.857143e-01 .
+
+data:rule10 a ont:AssociationRule ;
+    ont:hasAntecedent data:WD-4TB-Gaming-Drive-Works-with-Playstation-4-Portable-External-Hard-Drive ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:SanDisk-SSD-PLUS-1TB-Internal-SSD-SATA-III-6-Gb-s ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 7e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule11 a ont:AssociationRule ;
+    ont:hasAntecedent data:John-Hardy-Women-s-Legends-Naga-Gold-Silver-Dragon-Station-Chain-Bracelet ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops,
+        data:Mens-Casual-Premium-Slim-Fit-T-Shirts ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 3.5e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule12 a ont:AssociationRule ;
+    ont:hasAntecedent data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops,
+        data:John-Hardy-Women-s-Legends-Naga-Gold-Silver-Dragon-Station-Chain-Bracelet ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Mens-Casual-Premium-Slim-Fit-T-Shirts ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 3.5e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule13 a ont:AssociationRule ;
+    ont:hasAntecedent data:John-Hardy-Women-s-Legends-Naga-Gold-Silver-Dragon-Station-Chain-Bracelet,
+        data:Mens-Casual-Premium-Slim-Fit-T-Shirts ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 1.75e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule14 a ont:AssociationRule ;
+    ont:hasAntecedent data:Mens-Cotton-Jacket ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops,
+        data:Mens-Casual-Premium-Slim-Fit-T-Shirts ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 3.5e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule15 a ont:AssociationRule ;
+    ont:hasAntecedent data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops,
+        data:Mens-Cotton-Jacket ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Mens-Casual-Premium-Slim-Fit-T-Shirts ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 3.5e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule16 a ont:AssociationRule ;
+    ont:hasAntecedent data:Mens-Casual-Premium-Slim-Fit-T-Shirts,
+        data:Mens-Cotton-Jacket ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 1.75e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule2 a ont:AssociationRule ;
+    ont:hasAntecedent data:John-Hardy-Women-s-Legends-Naga-Gold-Silver-Dragon-Station-Chain-Bracelet ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 1.75e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule3 a ont:AssociationRule ;
+    ont:hasAntecedent data:Mens-Cotton-Jacket ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 1.75e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule4 a ont:AssociationRule ;
+    ont:hasAntecedent data:WD-2TB-Elements-Portable-External-Hard-Drive-USB-3-0 ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 1.75e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule5 a ont:AssociationRule ;
+    ont:hasAntecedent data:John-Hardy-Women-s-Legends-Naga-Gold-Silver-Dragon-Station-Chain-Bracelet ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Mens-Casual-Premium-Slim-Fit-T-Shirts ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 3.5e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule6 a ont:AssociationRule ;
+    ont:hasAntecedent data:Mens-Cotton-Jacket ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Mens-Casual-Premium-Slim-Fit-T-Shirts ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 3.5e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule7 a ont:AssociationRule ;
+    ont:hasAntecedent data:Pierced-Owl-Rose-Gold-Plated-Stainless-Steel-Double ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:White-Gold-Plated-Princess ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 7e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule8 a ont:AssociationRule ;
+    ont:hasAntecedent data:White-Gold-Plated-Princess ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:Pierced-Owl-Rose-Gold-Plated-Stainless-Steel-Double ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 7e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:rule9 a ont:AssociationRule ;
+    ont:hasAntecedent data:SanDisk-SSD-PLUS-1TB-Internal-SSD-SATA-III-6-Gb-s ;
+    ont:hasConfidence 1e+00 ;
+    ont:hasConsequent data:WD-4TB-Gaming-Drive-Works-with-Playstation-4-Portable-External-Hard-Drive ;
+    ont:hasConviction "INF"^^xsd:double ;
+    ont:hasLift 7e+00 ;
+    ont:hasSupport 1.428571e-01 .
+
+data:WD-2TB-Elements-Portable-External-Hard-Drive-USB-3-0 a ont:Item ;
+    rdfs:label "WD 2TB Elements Portable External Hard Drive - USB 3.0" ;
+    ont:hasFrequency 1 .
+
+data:Pierced-Owl-Rose-Gold-Plated-Stainless-Steel-Double a ont:Item ;
+    rdfs:label "Pierced Owl Rose Gold Plated Stainless Steel Double" ;
+    ont:hasFrequency 1 .
+
+data:SanDisk-SSD-PLUS-1TB-Internal-SSD-SATA-III-6-Gb-s a ont:Item ;
+    rdfs:label "SanDisk SSD PLUS 1TB Internal SSD - SATA III 6 Gb/s" ;
+    ont:hasFrequency 1 .
+
+data:WD-4TB-Gaming-Drive-Works-with-Playstation-4-Portable-External-Hard-Drive a ont:Item ;
+    rdfs:label "WD 4TB Gaming Drive Works with Playstation 4 Portable External Hard Drive" ;
+    ont:hasFrequency 1 .
+
+data:White-Gold-Plated-Princess a ont:Item ;
+    rdfs:label "White Gold Plated Princess" ;
+    ont:hasFrequency 1 .
+
+data:John-Hardy-Women-s-Legends-Naga-Gold-Silver-Dragon-Station-Chain-Bracelet a ont:Item ;
+    rdfs:label "John Hardy Women's Legends Naga Gold & Silver Dragon Station Chain Bracelet" ;
+    ont:hasFrequency 1 .
+
+data:Mens-Cotton-Jacket a ont:Item ;
+    rdfs:label "Mens Cotton Jacket" ;
+    ont:hasFrequency 1 .
+
+data:Mens-Casual-Premium-Slim-Fit-T-Shirts a ont:Item ;
+    rdfs:label "Mens Casual Premium Slim Fit T-Shirts" ;
+    ont:hasFrequency 2 .
+
+data:Fjallraven-Foldsack-No-1-Backpack-Fits-15-Laptops a ont:Item ;
+    rdfs:label "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops" ;
+    ont:hasFrequency 4 .
+
