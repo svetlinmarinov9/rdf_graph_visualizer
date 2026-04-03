@@ -9,8 +9,17 @@ from rdflib.namespace import RDF, XSD, RDFS
 ONT = Namespace("http://example.org/ontology/association#")
 DATA = Namespace("http://example.org/data/association#")
 
+# Определяме пътищата на файловете
+input_json_path = r"D:\fakeStore\cluster_model\associative_rules.json"
+current_dir = os.path.dirname(os.path.abspath(__file__))
+output_folder = os.path.join(current_dir, "turtle_file")
+output_path = os.path.join(output_folder, "associative_rules.ttl")
+
+# Създаваме папката ако не съществува
+os.makedirs(output_folder, exist_ok=True)
+
 # Зареждаме JSON файла от RapidMiner
-with open(r"D:\fakeStore\cluster_model\associative_rules.json", "r", encoding="utf-8") as f:
+with open(input_json_path, "r", encoding="utf-8") as f:
     data = json.load(f)
 
 g = Graph()
@@ -100,8 +109,5 @@ for i, rule in enumerate(data.get("associationRules", []), start=1):
         g.add((rule_uri, ONT.hasConsequent, item_uri))
 
 # Записване във файл
-output_folder = r"D:\fakeStore\turtle_file"
-os.makedirs(output_folder, exist_ok=True)
-output_path = os.path.join(output_folder, "associative_rules.ttl")
 g.serialize(destination=output_path, format="turtle")
-print(f"Written: {output_path}")
+print(f"Turtle файл записан в: {output_path}")
