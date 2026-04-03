@@ -1,4 +1,5 @@
 import json
+import os
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, XSD
 
@@ -6,8 +7,17 @@ from rdflib.namespace import RDF, RDFS, XSD
 ONT = Namespace("http://example.org/ontology/clustering#")
 DATA = Namespace("http://example.org/data/clustering#")
 
+# Определяме пътищата на файловете
+input_json_path = r"D:\fakeStore\cluster_model\cluster_model.json"
+current_dir = os.path.dirname(os.path.abspath(__file__))
+output_folder = os.path.join(current_dir, "turtle_file")
+output_path = os.path.join(output_folder, "cluster_model.ttl")
+
+# Създаваме папката ако не съществува
+os.makedirs(output_folder, exist_ok=True)
+
 # Зареждане на JSON
-with open(r"D:\fakeStore\cluster_model\cluster_model.json", "r") as f:
+with open(input_json_path, "r") as f:
     data = json.load(f)
 
 g = Graph()
@@ -44,7 +54,14 @@ for cluster in data["clusters"]:
         g.add((centroid_uri, ONT.hasFeature, Literal(value, datatype=XSD.float)))
     g.add((cluster_uri, ONT.hasCentroid, centroid_uri))
 
-    # Членове
+# Трекинг на асигнирани членове - всеки член става само в един клъстер
+assigned_members = {}
+
+for cluster in data["clusters"]:
+    cid = f"cluster{cluster['clusterId']}"
+    cluster_uri = DATA[cid]
+
+    # Членове - с проверка за дублиране
     for mid in cluster["exampleIds"]:
         # обработи като число или как текст (продукт име)
         try:
@@ -56,12 +73,22 @@ for cluster in data["clusters"]:
             slug = re.sub(r'[^A-Za-z0-9]+', '_', str(mid).strip())
             member_id = slug
         
+        # Ако членът вече е асигниран на друг клъстер, пропусни го
+        if member_id in assigned_members:
+            print(f"❌ {member_id} вече е в {assigned_members[member_id]}, пропускане от {cid}")
+            continue
+        
+        # Маркирай членът като асигниран на този клъстер
+        assigned_members[member_id] = cid
+        
         member_uri = DATA[member_id]
         g.add((member_uri, RDF.type, ONT.ClusterMember))
         g.add((member_uri, ONT.isMemberOf, cluster_uri))
         # Тук можеш да добавиш реален FeatureVector при наличие на данни
 
+print(f"\n✓ Общо уникални членове: {len(assigned_members)}")
+print(f"✓ Клъстери обработени: {len(data['clusters'])}")
+
 # Записване във файл
-output_folder = r"D:\fakeStore\turtle_file"  
-output_path = output_folder + r"\cluster_model.ttl"
 g.serialize(output_path, format="turtle")
+print(f"✓ Turtle файл записан в: {output_path}")

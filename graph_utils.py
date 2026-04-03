@@ -74,11 +74,10 @@ def create_network_figure(G):
         textposition='top center',
         hoverinfo='text',
         marker=dict(
-            showscale=True,
+            showscale=False,
             colorscale='Viridis',
             color=node_color,
             size=15,
-            colorbar=dict(title='Общност'),
             line_width=2
         )
     )
@@ -135,6 +134,7 @@ def create_heatmap(G):
         )
     )
 
+
 def create_table_figure(adj_df):
     # Опыт эксклюдирани нодове
     exclude_nodes = ['result1', 'centroid0', 'centroid1', 'centroid2', 'centroid3']
@@ -154,7 +154,7 @@ def create_table_figure(adj_df):
         data=[go.Table(
             columnwidth=[120] * column_count,
             header=dict(
-                values=["Върхове"] + formatted_columns,
+                values=["Продукти"] + formatted_columns,
                 fill_color='paleturquoise',
                 align='center',
                 font=dict(color='black', size=12),

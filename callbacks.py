@@ -111,11 +111,21 @@ def register_callbacks(app):
 
             if tab == 'tab-2':
                 adj_df = graph_utils.create_adjacency_matrix(nx_graph)
-                # Редове: cluster0-3, Колони: всички ОСВЕН cluster0-3 и други неважни елементи
+                # Показваме клъстери 0-3
                 clusters_to_show = ['cluster0', 'cluster1', 'cluster2', 'cluster3']
                 exclude_keywords = ['cluster0', 'cluster1', 'cluster2', 'cluster3', 'clustermember', 'cluster', 'centroidclustermodel', 'clusteringalgorithm']
+                
+                # Включи само клъстери които съществуват в индекса
                 rows_to_show = [c for c in clusters_to_show if c in adj_df.index]
                 cols_to_show = sorted([c for c in adj_df.columns if not any(ex.lower() in str(c).lower() for ex in exclude_keywords)])
+                
+                # Ако няма редове, покажи съобщение
+                if not rows_to_show:
+                    return None, html.Div([
+                        html.H4("Матрица на съседство"),
+                        html.P("Няма данни за матрицата - всички клъстери може да са празни или без членове.")
+                    ])
+                
                 if rows_to_show and cols_to_show:
                     adj_df_filtered = adj_df.loc[rows_to_show, cols_to_show]
                 else:
@@ -170,7 +180,7 @@ def register_callbacks(app):
                 return None, html.Div([
                     html.H4("Анализ на графа"),
                     html.Ul([
-                        html.Li(f"Брой върхове: {num_nodes}"),
+                        html.Li(f"Брой върхове (продукти): {num_nodes}"),
                         html.Li(f"Брой ребра: {num_edges}"),
                         html.Li(f"Средна степен: {avg_degree:.2f}"),
                         html.Li(f"Плътност на графа: {density:.4f}"),
@@ -475,7 +485,7 @@ def register_callbacks(app):
                     return dash.no_update, html.Div([
                         html.H4("Анализ на графа"),
                         html.Ul([
-                            html.Li(f"Брой върхове: {num_nodes}"),
+                            html.Li(f"Брой върхове (продукти): {num_nodes}"),
                             html.Li(f"Брой ребра: {num_edges}"),
                             html.Li(f"Средна степен: {avg_degree:.2f}"),
                             html.Li(f"Плътност на графа: {density:.4f}"),
