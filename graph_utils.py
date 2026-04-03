@@ -98,41 +98,122 @@ def create_network_figure(G):
 
 
 def create_heatmap(G):
-    adj_df = create_adjacency_matrix(G)
-    # Филтрираме редове и колони както в таблицата
-    clusters_to_show = ['cluster0', 'cluster1', 'cluster2', 'cluster3']
-    exclude_keywords = ['cluster0', 'cluster1', 'cluster2', 'cluster3', 'clustermember', 'cluster', 'centroidclustermodel', 'clusteringalgorithm', 'result1', 'centroid0', 'centroid1', 'centroid2', 'centroid3']
-    rows_to_show = [c for c in clusters_to_show if c in adj_df.index]
-    cols_to_show = sorted([c for c in adj_df.columns if not any(ex.lower() in str(c).lower() for ex in exclude_keywords)])
-    
-    if rows_to_show and cols_to_show:
-        adj_df_filtered = adj_df.loc[rows_to_show, cols_to_show]
-    else:
-        adj_df_filtered = adj_df
-    
-    # Замени _ със интервал за по-добра четимост
-    formatted_columns = [str(col).replace('_', ' ') for col in adj_df_filtered.columns]
-    formatted_index = [str(idx).replace('_', ' ') for idx in adj_df_filtered.index]
-    
-    return go.Figure(
-        data=go.Heatmap(
-            z=adj_df_filtered.values,
-            x=formatted_columns,
-            y=formatted_index,
-            colorscale='YlOrRd',
-            xgap=2,  # Разстояние между колоните
-            ygap=2,  # Разстояние между редовете
-            hovertemplate='%{y} - %{x}: %{z}<extra></extra>'
-        ),
-        layout=go.Layout(
-            title="Heatmap на съседството",
-            title_x=0.5,
-            margin=dict(l=100, r=50, t=50, b=100),
-            paper_bgcolor='#f9f9f9',
-            width=max(600, len(adj_df_filtered.columns) * 80),
-            height=max(500, len(adj_df_filtered) * 80)
+    """Heatmap с характеристиките на центроидите (FeatureVector)"""
+    try:
+        import os
+        from rdflib import Graph, Namespace
+        
+        ONT = Namespace("http://example.org/ontology/clustering#")
+        DATA = Namespace("http://example.org/data/clustering#")
+        
+        # Зареждаме Turtle файла ако съществува
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        turtle_path = os.path.join(current_dir, "turtle_file", "cluster_model.ttl")
+        
+        if not os.path.exists(turtle_path):
+            # Ако няма Turtle файл, показваме съобщение
+            return go.Figure(
+                layout=go.Layout(
+                    title="Няма Turtle данни за характеристиките",
+                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+                )
+            )
+        
+        # Зареждаме RDF графика от Turtle
+        rdf_graph = Graph()
+        rdf_graph.parse(turtle_path, format="turtle")
+        
+        # Извличаме характеристики на центроидите
+        cluster_features = {}
+        
+        query = """
+        SELECT ?cluster ?feature_idx ?value
+        WHERE {
+            ?cluster a <http://example.org/ontology/clustering#Cluster> ;
+                    <http://example.org/ontology/clustering#hasCentroid> ?centroid .
+            ?centroid <http://example.org/ontology/clustering#hasFeature> ?value .
+        }
+        ORDER BY ?cluster ?feature_idx
+        """
+        
+        for row in rdf_graph.query(query):
+            cluster_name = str(row.cluster).split('/')[-1]
+            value = float(str(row.value))
+            
+            if cluster_name not in cluster_features:
+                cluster_features[cluster_name] = []
+            cluster_features[cluster_name].append(value)
+        
+        if not cluster_features:
+            return go.Figure(
+                layout=go.Layout(
+                    title="Няма характеристици за показване",
+                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+                )
+            )
+        
+        # Конвертиране в DataFrame
+        import pandas as pd
+        df = pd.DataFrame.from_dict(cluster_features, orient='index')
+        
+        # Опитваме се да вземем имена на характеристиките от JSON
+        feature_names = None
+        json_path = r"D:\fakeStore\cluster_model\cluster_model.json"
+        import json
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, 'r') as f:
+                    data = json.load(f)
+                    # Тьърсим имена на характеристиките
+                    if "dimensionNames" in data:
+                        feature_names = data["dimensionNames"]
+                    elif "attribute_names" in data:
+                        feature_names = data["attribute_names"]
+                    elif "headerExampleSet" in data and "columns" in data["headerExampleSet"]:
+                        feature_names = [col["name"] for col in data["headerExampleSet"]["columns"]]
+            except Exception as e:
+                print(f"Error reading feature names from JSON: {e}")
+                pass
+        
+        # Задаваме имена на колоните
+        if feature_names and len(feature_names) == len(df.columns):
+            df.columns = feature_names
+        else:
+            df.columns = [f"Характеристика {i+1}" for i in range(len(df.columns))]
+        
+        # Фиксираме имена на редовете - само клъстерът
+        df.index = [f"Клъстер {idx.split('cluster')[-1]}" if 'cluster' in idx.lower() else idx for idx in df.index]
+        df = df.sort_index()
+        
+        # Попълваме NaN стойности с 0
+        df = df.fillna(0)
+        
+        return go.Figure(
+            data=go.Heatmap(
+                z=df.values,
+                x=df.columns,
+                y=df.index,
+                colorscale='Viridis',
+                hovertemplate='%{y} - %{x}: %{z:.4f}<extra></extra>',
+                colorbar=dict(title="Стойност")
+            ),
+            layout=go.Layout(
+                title="Heatmap на характеристиките на центроидите",
+                title_x=0.5,
+                margin=dict(l=100, r=100, t=50, b=100),
+                paper_bgcolor='#f9f9f9',
+                width=max(800, len(df.columns) * 100),
+                height=max(400, len(df) * 100)
+            )
         )
-    )
+        
+    except Exception as e:
+        print(f"Error in create_heatmap: {e}")
+        import traceback
+        traceback.print_exc()
+        return go.Figure()
 
 
 def create_table_figure(adj_df):
